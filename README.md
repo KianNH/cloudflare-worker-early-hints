@@ -17,8 +17,9 @@ Check out my [blog post!](https://kian.org.uk/implementing-103-early-hints-with-
 
 ## Instructions
 
+1. Make sure that Early Hints is enabled in [Speed -> Optimization](https://dash.cloudflare.com/?to=/:account/:zone/speed/optimization)
 1. Clone the repository.
-2. Make sure that you `wrangler` logged in to your Cloudflare account.
+2. Make sure that your `wrangler` logged in to your Cloudflare account.
 3. Open `wrangler.toml` and add a `route` key as necessary to make the Worker run on your website.
 ```toml
 route = { pattern = "example.com/*", zone_name = "example.com" } 
