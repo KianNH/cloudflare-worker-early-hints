@@ -14,6 +14,8 @@ Check out my [blog post!](https://kian.org.uk/implementing-103-early-hints-with-
 
 If your site has a lot of `img`/`script`/`link[rel=stylesheet]` elements, you will want to make sure you're scoping the selectors to the specific ones you want to preload! If your `link` header gets too large, this can cause issues - many servers or CDNs limit the size of an individual header to 8192B (8KB).
 
+Take a look at the [Don't Overhint!](https://kian.org.uk/implementing-103-early-hints-with-cloudflare-workers-htmlrewriter/#dont-overhint) section of the blog post.
+
 ## Requirements
 
 - [A Cloudflare Account](https://dash.cloudflare.com/sign-up/workers) and a website using Cloudflare.
