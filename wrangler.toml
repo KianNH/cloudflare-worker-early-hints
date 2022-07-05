@@ -1,0 +1,5 @@
+name = "early-hints-worker"
+main = "src/index.ts"
+compatibility_date = "2022-07-05"
+
+# route = { pattern = "example.com/*", zone_name = "example.com"
