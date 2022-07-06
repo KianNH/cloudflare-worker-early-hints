@@ -51,7 +51,7 @@ export default {
     }
 
     const transformed = new HTMLRewriter()
-      .on("img", new ElementHandler())
+      .on("img:not([loading=lazy])", new ElementHandler())
       .on("script", new ElementHandler())
       .on("link[rel=stylesheet]", new ElementHandler())
       .transform(response);
