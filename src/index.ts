@@ -20,7 +20,7 @@ export default {
       return response;
     }
 
-    const preloads: PreloadResourceHint[] = [];
+    let preloads: PreloadResourceHint[] = [];
 
     class ElementHandler {
       element(element: Element) {
@@ -59,6 +59,7 @@ export default {
     const body = await transformed.text();
     const headers = new Headers(response.headers);
 
+    preloads = [...new Map(preloads.map(v => [v.url, v])).values()]
     preloads.forEach((element) => {
       headers.append(
         "link",
