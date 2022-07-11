@@ -21,6 +21,22 @@ Take a look at the [Don't Overhint!](https://kian.org.uk/implementing-103-early-
 - [A Cloudflare Account](https://dash.cloudflare.com/sign-up/workers) and a website using Cloudflare.
 - [wrangler](https://github.com/cloudflare/wrangler2)
 
+## Preconnect Domains
+
+103 Early Hints also supports `rel=preconnect` hints - this will 'warm up' the connection ahead of requesting resources
+and is good for assets that don't necessarily need preloading, but you will be fetching soon after the page load.
+
+The recommendation is to do this for important third-party origins, i.e Google Analytics or Google Fonts
+> Preconnect Link headers to important third-party origins (e.g. an origin hosting the pages’ assets, or Google Fonts).
+https://blog.cloudflare.com/early-hints-performance/
+
+In order to configure this, add an array of domains to the `preconnect_domains` variable in `wrangler.toml`.
+
+```toml
+[vars]
+preconnect_domains = ["https://kian.org.uk", "https://www.google-analytics.com"]
+```
+
 ## Instructions
 
 1. Make sure that Early Hints is enabled in [Speed -> Optimization](https://dash.cloudflare.com/?to=/:account/:zone/speed/optimization)
@@ -30,5 +46,5 @@ Take a look at the [Don't Overhint!](https://kian.org.uk/implementing-103-early-
 ```toml
 route = { pattern = "example.com/*", zone_name = "example.com" } 
 ```
-5. If necessary, make any changes to the HTML element selectors. You don't want to preload lazy-loaded images, as an example.
+5. If necessary, make any changes to the HTML element selectors or add `rel=preconnect` hints as per [preconnect domains](README.md#preconnect-domains).
 6. Run `wrangler publish` and the Worker will be live on your website!

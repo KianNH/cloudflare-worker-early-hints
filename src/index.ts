@@ -3,8 +3,12 @@ interface PreloadResourceHint {
   fileType: "style" | "image" | "script";
 }
 
+interface Env {
+  preconnect_domains: string[];
+}
+
 export default {
-  async fetch(request: Request, env: {}, ctx: ExecutionContext) {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     ctx.passThroughOnException();
 
     const response = await fetch(request);
@@ -59,13 +63,19 @@ export default {
     const body = await transformed.text();
     const headers = new Headers(response.headers);
 
-    preloads = [...new Map(preloads.map(v => [v.url, v])).values()]
+    preloads = [...new Map(preloads.map((v) => [v.url, v])).values()];
     preloads.forEach((element) => {
       headers.append(
         "link",
         `<${element.url}>; rel=preload; as=${element.fileType}`
       );
     });
+
+    if (env.preconnect_domains) {
+      env.preconnect_domains.forEach((url) => {
+        headers.append("link", `<${url}>; rel=preconnect`);
+      });
+    }
 
     return new Response(body, {
       ...response,
