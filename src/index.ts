@@ -1,7 +1,6 @@
-interface PreloadResourceHint {
-  url: string;
-  fileType: "style" | "image" | "script";
-}
+// valid 'as' attribute values, see Chromium source:
+// https://source.chromium.org/chromium/chromium/src/+/refs/tags/103.0.5060.9:services/network/public/mojom/link_header.mojom;l=20
+type LinkAsAttribute = "image" | "script" | "style" | "font"
 
 interface Env {
   preconnect_domains: string[];
@@ -24,7 +23,7 @@ export default {
       return response;
     }
 
-    let preloads: PreloadResourceHint[] = [];
+    let preloads: Record<string, LinkAsAttribute> = {}
 
     class ElementHandler {
       element(element: Element) {
@@ -32,21 +31,21 @@ export default {
           case "img": {
             const url = element.getAttribute("src");
             if (url && !url.startsWith("data:")) {
-              preloads.push({ url, fileType: "image" });
+              preloads[url] =  "image";
             }
             break;
           }
           case "script": {
             const url = element.getAttribute("src");
             if (url && !url.startsWith("data:")) {
-              preloads.push({ url, fileType: "script" });
+              preloads[url] =  "script";
             }
             break;
           }
           case "link": {
             const url = element.getAttribute("href");
             if (url && !url.startsWith("data:")) {
-              preloads.push({ url, fileType: "style" });
+              preloads[url] =  "style";
             }
             break;
           }
@@ -63,13 +62,12 @@ export default {
     const body = await transformed.text();
     const headers = new Headers(response.headers);
 
-    preloads = [...new Map(preloads.map((v) => [v.url, v])).values()];
-    preloads.forEach((element) => {
+    for (const [url, fileType] of Object.entries(preloads)) {
       headers.append(
         "link",
-        `<${element.url}>; rel=preload; as=${element.fileType}`
+        `<${url}>; rel=preload; as=${fileType}`
       );
-    });
+    }
 
     if (env.preconnect_domains) {
       env.preconnect_domains.forEach((url) => {
