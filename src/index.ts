@@ -1,6 +1,6 @@
 // valid 'as' attribute values, see Chromium source:
 // https://source.chromium.org/chromium/chromium/src/+/refs/tags/103.0.5060.9:services/network/public/mojom/link_header.mojom;l=20
-type LinkAsAttribute = "image" | "script" | "style" | "font"
+type LinkAsAttribute = "image" | "script" | "style" | "font";
 
 interface Env {
   preconnect_domains: string[];
@@ -13,17 +13,17 @@ export default {
     const response = await fetch(request);
 
     if (response.status !== 200) {
-      console.log(`${request.url} returned (${response.status}), skipping`);
       return response;
     }
 
     const contentType = response.headers.get("content-type");
     if (contentType === null || !contentType.startsWith("text/html")) {
-      console.log(`${request.url} is (${contentType}), skipping`);
       return response;
     }
 
-    let preloads: Record<string, LinkAsAttribute> = {}
+    const preloads: {
+      [url: string]: { fileType: LinkAsAttribute; crossOrigin: string | null };
+    } = {};
 
     class ElementHandler {
       element(element: Element) {
@@ -31,21 +31,24 @@ export default {
           case "img": {
             const url = element.getAttribute("src");
             if (url && !url.startsWith("data:")) {
-              preloads[url] =  "image";
+              const crossOrigin = element.getAttribute("crossorigin");
+              preloads[url] = { fileType: "image", crossOrigin };
             }
             break;
           }
           case "script": {
             const url = element.getAttribute("src");
             if (url && !url.startsWith("data:")) {
-              preloads[url] =  "script";
+              const crossOrigin = element.getAttribute("crossorigin");
+              preloads[url] = { fileType: "script", crossOrigin };
             }
             break;
           }
           case "link": {
             const url = element.getAttribute("href");
             if (url && !url.startsWith("data:")) {
-              preloads[url] =  "style";
+              const crossOrigin = element.getAttribute("crossorigin");
+              preloads[url] = { fileType: "style", crossOrigin };
             }
             break;
           }
@@ -62,11 +65,12 @@ export default {
     const body = await transformed.text();
     const headers = new Headers(response.headers);
 
-    for (const [url, fileType] of Object.entries(preloads)) {
-      headers.append(
-        "link",
-        `<${url}>; rel=preload; as=${fileType}`
-      );
+    for (const [url, { fileType, crossOrigin }] of Object.entries(preloads)) {
+      let value = `<${url}>; rel=preload; as=${fileType}`;
+      if (crossOrigin) {
+        value += `; crossorigin=${crossOrigin}`;
+      }
+      headers.append("link", value);
     }
 
     if (env.preconnect_domains) {
